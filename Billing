@@ -1,0 +1,72 @@
+import datetime
+
+class Customer:
+    def __init__(self, customer_id, name, email):
+        self.customer_id = customer_id
+        self.name = name
+        self.email = email
+
+class Item:
+    def __init__(self, description, quantity, price_per_unit):
+        self.description = description
+        self.quantity = quantity
+        self.price_per_unit = price_per_unit
+
+    def calculate_total(self):
+        return self.quantity * self.price_per_unit
+
+class Invoice:
+    def __init__(self, invoice_id, customer):
+        self.invoice_id = invoice_id
+        self.customer = customer
+        self.items = []
+        self.date = datetime.datetime.now()
+        self.status = "Unpaid"
+
+    def add_item(self, item):
+        self.items.append(item)
+
+    def calculate_subtotal(self):
+        return sum(item.calculate_total() for item in self.items)
+
+    def calculate_tax(self, tax_rate):
+        return self.calculate_subtotal() * tax_rate
+
+    def calculate_total(self, tax_rate=0.1):
+        return self.calculate_subtotal() + self.calculate_tax(tax_rate)
+
+    def mark_as_paid(self):
+        self.status = "Paid"
+
+    def generate_invoice_summary(self):
+        summary = f"Invoice ID: {self.invoice_id}\nDate: {self.date.strftime('%Y-%m-%d')}\n"
+        summary += f"Customer: {self.customer.name} ({self.customer.email})\n\n"
+        summary += "Items:\n"
+        for item in self.items:
+            summary += f"- {item.description}: {item.quantity} x ${item.price_per_unit:.2f} = ${item.calculate_total():.2f}\n"
+        subtotal = self.calculate_subtotal()
+        tax = self.calculate_tax(0.1)
+        total = self.calculate_total()
+        summary += f"\nSubtotal: ${subtotal:.2f}\nTax: ${tax:.2f}\nTotal: ${total:.2f}\n"
+        summary += f"Status: {self.status}\n"
+        return summary
+
+# Example Usage
+if __name__ == "__main__":
+    # Create a customer
+    customer = Customer(customer_id=1, name="John Doe", email="john.doe@example.com")
+
+    # Create an invoice
+    invoice = Invoice(invoice_id=101, customer=customer)
+
+    # Add items to the invoice
+    invoice.add_item(Item(description="Widget A", quantity=5, price_per_unit=20.0))
+    invoice.add_item(Item(description="Widget B", quantity=3, price_per_unit=15.0))
+
+    # Print the invoice summary
+    print(invoice.generate_invoice_summary())
+
+    # Mark as paid and print updated status
+    invoice.mark_as_paid()
+    print("\nAfter payment:")
+    print(invoice.generate_invoice_summary())
